@@ -1,1 +1,1 @@
-# mediasetinfinity
+# plugin.video.mediasetinfinity
