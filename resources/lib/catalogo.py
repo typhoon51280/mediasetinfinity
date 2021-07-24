@@ -5,5 +5,20 @@ from codequick import Route
 from codequick.listing import Listitem
 
 @Route.register
-def watchmojo(plugin, content_type="video"):
-    yield Listitem.youtube("UCaWd5_7JhbQBe4dknZhsHJg", label="WatchMojo")
+def catalogoMPI(plugin):
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+
+@Route.register
+def sections(plugin):
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+    yield Listitem.from_dict(programmi_tv, label="Programmi Tv")
+
+
+@Route.register
+def programmi_tv(plugin):
+    yield Listitem.from_dict("/resources/lib/catalogo:sections", label="Catalogo")

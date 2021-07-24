@@ -28,7 +28,7 @@
         </news>
         <assets>
             <icon>resources/media/icon.png</icon>
-            <fanart>resources/media/fanart.jpg</fanart>
+            <fanart>resources/media/fanart.png</fanart>
             <banner></banner>
             <clearlogo></clearlogo> <!-- optional  -->
             <screenshot></screenshot> <!-- optional, max 10  -->
