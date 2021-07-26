@@ -1,42 +1,62 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import logging
 
 from resources.lib.api.accedo import ApiAccedo
-from codequick import Route
-from codequick.listing import Listitem
-from codequick.support import logger_id
+from codequick import Route, Listitem
 
-# Logger specific to this module
-logger = logging.getLogger("%s.catalogo" % logger_id)
+CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
 
 @Route.register
-def navigation(plugin, id):
+def navigation(plugin, id=CATALOGO_MEDIASET):
+    plugin.log("navigation %s", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
     navItems = apiAccedo.entry(id)['navItems']
-    logger.debug("navItems %s" % navItems)
+    plugin.log("navItems %s", [navItems], plugin.INFO)
     data = apiAccedo.entriesById(navItems)
-    logger.debug("data %s" % data)
+    plugin.log("data %s", [data], plugin.DEBUG)
+    no_data = True
     for item in data['entries']:
-        logger.debug("item %s" % item)
         if item:
-            mappedItem = apiAccedo.mapItem(item)
-            logger.debug("mappedItem %s" % mappedItem)
-            if mappedItem:
-                yield Listitem.from_dict(**mappedItem)
+            plugin.log("item %s", [item], plugin.DEBUG)
+            listItem = apiAccedo.mapItem(item)
+            plugin.log("listItem %s", [listItem], plugin.DEBUG)
+            if listItem:
+                no_data = False
+                yield Listitem.from_dict(**listItem)
+    if no_data:
+        yield False
 
 @Route.register
-def browsepage(plugin, id):
-    logger.debug("browsepage %s" % id)
+def navitem(plugin, id):
+    plugin.log("navitem %s", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
     components = apiAccedo.entry(id)['components']
-    logger.debug("components %s" % components)
+    plugin.log("components %s", [components], plugin.DEBUG)
     data = apiAccedo.entriesById(components)
-    logger.debug("data %s" % data)
+    plugin.log("data %s", [data], plugin.DEBUG)
+    no_data = True
+    yield False
     for item in data['entries']:
-        logger.debug("item %s" % item)
         if item:
-            mappedItem = apiAccedo.mapItem(item)
-            logger.debug("mappedItem %s" % mappedItem)
-            if mappedItem:
-                yield Listitem.from_dict(**mappedItem)
+            plugin.log("item %s", [item], plugin.DEBUG)
+            listItem = apiAccedo.mapItem(item)
+            plugin.log("listItem %s", [listItem], plugin.DEBUG)
+            if listItem:
+                no_data = False
+                yield Listitem.from_dict(**listItem)
+    if no_data:
+        yield False
+
+@Route.register
+def banner(plugin, uxReferenceV2, feedurlV2):
+    plugin.log("banner [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
+    yield False
+
+# @staticmethod
+# def mapItem(data):
+#     listItem = ApiAccedo.mapItem(data)
+#     logger.debug("listItem %s" % listItem)
+#     if listItem:
+#         yield Listitem.from_dict(**listItem)
+#     else:
+#         yield False
