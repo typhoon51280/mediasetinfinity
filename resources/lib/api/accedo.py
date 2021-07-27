@@ -153,7 +153,7 @@ class ApiAccedo():
         for x in data:
             x['ratio_len_0'] = round(ratio, 2)
             x['ratio_len_1'] = round(abs(x['ratio']-x['ratio_len_0']), 2)
-            x['ratio_len_2'] = round(x['ratio_len_1']/x['width'], 4)
+            x['ratio_len_2'] = round(x['ratio_len_1'] + (10000.0-x['width'])/10000000.0, 6)
         data_sorted = sorted(data, key=lambda x: x['ratio_len_2'])
         Script.log("img_data_sorted = %s", [data_sorted], Script.DEBUG)
         return data_sorted[0]
@@ -172,6 +172,7 @@ class ApiAccedo():
                 'banner': img_fanart,
                 'fanart': img_fanart,
                 'landscape': img_fanart,
+                'thumb': img_poster,
                 'icon': self.metadata['assets']['shortLogoSecondary'].replace(".png", "@3.png"),
             },
             'params': {
