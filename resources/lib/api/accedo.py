@@ -2,6 +2,7 @@ import json
 
 import urlquick
 from codequick import Route, Script, utils
+from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
 from resources.lib.six import string_types
 
@@ -112,11 +113,67 @@ class ApiAccedo():
             },
             'callback': self.route("catalogo", data['_meta']['attrs']['componentType']),
         }
-    
+
+    def images_map(self, baseUrl, data):
+        def __map(el):
+            dim = el[0].split("x")
+            width = float(dim[0])
+            height = float(dim[1])
+            ratio =  round(width/height, 2)
+            return {
+                'width': width,
+                'height': height,
+                'ratio': ratio,
+                'url': el[1],
+            }
+        image_data = []
+        for el in map(__map, data.items()):
+            image_data.append({
+                'width': el['width'],
+                'height': el['height'],
+                'ratio': el['ratio'],
+                'url': baseUrl + el['url'],
+            })
+            image_data.append({
+                'width': el['width'] * 2.0,
+                'height': el['height'] * 2.0,
+                'ratio': el['ratio'],
+                'url': baseUrl + el['url'].replace(".jpg", "@2.jpg"),
+            })
+            image_data.append({
+                'width': el['width'] * 3.0,
+                'height': el['height'] * 3.0,
+                'ratio': el['ratio'],
+                'url': baseUrl + el['url'].replace(".jpg", "@3.jpg"),
+            })
+        return image_data
+
+    def images_filter(self, items, ratio=0.0, wmin=0.0, hmin=0.0, wmax=0.0, hmax=0.0):
+        data = filter(lambda x: x['width']>wmin and x['height']>hmin and (wmax==0 or x['width']<wmax) and (hmax==0 or x['height']<hmax), items)
+        for x in data:
+            x['ratio_len_0'] = round(ratio, 2)
+            x['ratio_len_1'] = round(abs(x['ratio']-x['ratio_len_0']), 2)
+            x['ratio_len_2'] = round(x['ratio_len_1']/x['width'], 4)
+        data_sorted = sorted(data, key=lambda x: x['ratio_len_2'])
+        Script.log("img_data_sorted = %s", [data_sorted], Script.DEBUG)
+        return data_sorted[0]
+
     def component_banner(self, data):
         item = self.entry(data['items'][0])
+        img = json.loads(item['img'])
+        images = self.images_map(img['data']['p'], img['data']['i'])
+        Script.log("images = %s", [images], Script.DEBUG)
+        img_poster = self.images_filter(images, 3.0/5.0)['url']
+        img_fanart = self.images_filter(images, 16.0/9.0)['url']
         return {
             'label': data['title'],
+            'art': {
+                'poster': img_poster,
+                'banner': img_fanart,
+                'fanart': img_fanart,
+                'landscape': img_fanart,
+                'icon': self.metadata['assets']['shortLogoSecondary'].replace(".png", "@3.png"),
+            },
             'params': {
                 'uxReferenceV2': item['uxReferenceV2'] if 'uxReferenceV2' in item else None,
                 'feedurlV2': item['feedurlV2'] if 'feedurlV2' in item else None,

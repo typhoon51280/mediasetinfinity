@@ -6,7 +6,7 @@ from codequick import Route, Listitem
 
 CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
 
-@Route.register
+@Route.register(content_type=None)
 def navigation(plugin, id=CATALOGO_MEDIASET):
     plugin.log("navigation %s", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
@@ -26,7 +26,7 @@ def navigation(plugin, id=CATALOGO_MEDIASET):
     if no_data:
         yield False
 
-@Route.register
+@Route.register(content_type=None)
 def navitem(plugin, id):
     plugin.log("navitem %s", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
@@ -47,16 +47,7 @@ def navitem(plugin, id):
     if no_data:
         yield False
 
-@Route.register
+@Route.register(content_type=None)
 def banner(plugin, uxReferenceV2, feedurlV2):
     plugin.log("banner [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
     yield False
-
-# @staticmethod
-# def mapItem(data):
-#     listItem = ApiAccedo.mapItem(data)
-#     logger.debug("listItem %s" % listItem)
-#     if listItem:
-#         yield Listitem.from_dict(**listItem)
-#     else:
-#         yield False
