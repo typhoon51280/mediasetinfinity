@@ -1,10 +1,10 @@
 import json
-
 import urlquick
 from codequick import Route, Script, utils
 from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
 from resources.lib.six import string_types
+from resources.lib.api.utils import route_callback
 
 #: The time in seconds where a cache item is considered stale.
 #: Stale items will stay in the database to allow for conditional headers.
@@ -70,7 +70,7 @@ class ApiAccedo():
         response = self.session.get(url, params={'locale': locale, 'typeAlias': alias}, auth=self.auth)
         return response.json()
 
-    def mapItem(self, data):
+    def listItem(self, data):
         if data and '_meta' in data:
             typeAlias = data['_meta']['typeAlias']
             if typeAlias == 'navigation-item':
@@ -91,7 +91,7 @@ class ApiAccedo():
             'params': {
                 'id': ctaLink['referenceId']
             },
-            'callback': self.route("catalogo", data['_meta']['attrs']['componentType']),
+            'callback': route_callback("catalogo", data['_meta']['attrs']['componentType']),
         }
 
     def component_brands(self, data):
@@ -101,7 +101,7 @@ class ApiAccedo():
                 'uxReferenceV2': data['uxReferenceV2'] if 'uxReferenceV2' in data else None,
                 'feedurlV2': data['feedurlV2'] if 'feedurlV2' in data else None,
             },
-            'callback': self.route("catalogo", data['_meta']['attrs']['componentType']),
+            'callback': route_callback("catalogo", data['_meta']['attrs']['componentType']),
         }
 
     def component_video_mixed(self, data):
@@ -111,7 +111,7 @@ class ApiAccedo():
                 'uxReferenceV2': data['uxReferenceV2'] if 'uxReferenceV2' in data else None,
                 'feedurlV2': data['feedurlV2'] if 'feedurlV2' in data else None,
             },
-            'callback': self.route("catalogo", data['_meta']['attrs']['componentType']),
+            'callback': route_callback("catalogo", data['_meta']['attrs']['componentType']),
         }
 
     def images_map(self, baseUrl, data):
@@ -153,8 +153,8 @@ class ApiAccedo():
         for x in data:
             x['ratio_len_0'] = round(ratio, 2)
             x['ratio_len_1'] = round(abs(x['ratio']-x['ratio_len_0']), 2)
-            x['ratio_len_2'] = round(x['ratio_len_1'] + (10000.0-x['width'])/10000000.0, 6)
-        data_sorted = sorted(data, key=lambda x: x['ratio_len_2'])
+            x['sort'] = round(abs(x['ratio']-ratio) + (10000.0-x['width'])/10000000.0, 6)
+        data_sorted = sorted(data, key=lambda x: x['sort'])
         Script.log("img_data_sorted = %s", [data_sorted], Script.DEBUG)
         return data_sorted[0]
 
@@ -165,6 +165,7 @@ class ApiAccedo():
         Script.log("images = %s", [images], Script.DEBUG)
         img_poster = self.images_filter(images, 3.0/5.0)['url']
         img_fanart = self.images_filter(images, 16.0/9.0)['url']
+        img_thumb = self.images_filter(images, 4.0/4.0)['url']
         return {
             'label': data['title'],
             'art': {
@@ -172,17 +173,15 @@ class ApiAccedo():
                 'banner': img_fanart,
                 'fanart': img_fanart,
                 'landscape': img_fanart,
-                'thumb': img_poster,
-                'icon': self.metadata['assets']['shortLogoSecondary'].replace(".png", "@3.png"),
+                'thumb': img_thumb,
+                # 'icon': self.metadata['assets']['shortLogoSecondary'].replace(".png", "@2.png"),
+            },
+            'info': {
+                'plot': item['subtitle']
             },
             'params': {
                 'uxReferenceV2': item['uxReferenceV2'] if 'uxReferenceV2' in item else None,
                 'feedurlV2': item['feedurlV2'] if 'feedurlV2' in item else None,
             },
-            'callback': self.route("catalogo", data['_meta']['attrs']['componentType']),
+            'callback': route_callback("catalogo", data['_meta']['attrs']['componentType']),
         }
-
-    def route(self, route, callback):
-        ref = Route.ref("/resources/lib/{route}:{callback}".format(route=route, callback=callback.replace("-", "_").lower()))
-        Script.log("Route [%s]", [ref.path], Script.DEBUG)
-        return ref
