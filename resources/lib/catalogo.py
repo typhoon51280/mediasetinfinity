@@ -9,7 +9,7 @@ CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
 
 @Route.register(content_type=None)
 def navigation(plugin, id=CATALOGO_MEDIASET):
-    plugin.log("Route catalog:navigation %s", [id], plugin.INFO)
+    plugin.log("Route (catalogo:navigation) [%s]", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
     navItems = apiAccedo.entry(id)['navItems']
     plugin.log("navItems %s", [navItems], plugin.INFO)
@@ -29,7 +29,7 @@ def navigation(plugin, id=CATALOGO_MEDIASET):
 
 @Route.register(content_type=None)
 def navitem(plugin, id):
-    plugin.log("Route catalog:navitem %s", [id], plugin.INFO)
+    plugin.log("Route (catalogo:navitem) [%s]", [id], plugin.INFO)
     apiAccedo = ApiAccedo()
     components = apiAccedo.entry(id)['components']
     plugin.log("components %s", [components], plugin.DEBUG)
@@ -49,12 +49,12 @@ def navitem(plugin, id):
 
 @Route.register(content_type=None)
 def banner(plugin, uxReferenceV2, feedurlV2):
-    plugin.log("Route catalog:banner [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
+    plugin.log("Route (catalogo:banner) [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
     yield False
 
 @Route.register(content_type=None)
 def brands(plugin, uxReferenceV2, feedurlV2):
-    plugin.log("Route catalog:brands [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
+    plugin.log("Route (catalogo:brands) [%s, %s]", [uxReferenceV2, feedurlV2], plugin.INFO)
     apiMediaset = ApiMediaset()
     no_data = True
     if uxReferenceV2:
@@ -72,5 +72,5 @@ def brands(plugin, uxReferenceV2, feedurlV2):
 
 @Route.register(content_type=None)
 def tvseason(plugin, seriesId, seasonId):
-    plugin.log("Route catalog:tvseason [%s, %s]", [seriesId, seasonId], plugin.INFO)
+    plugin.log("Route (catalogo:tvseason) [%s, %s]", [seriesId, seasonId], plugin.INFO)
     yield False
