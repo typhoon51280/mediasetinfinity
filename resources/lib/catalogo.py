@@ -73,4 +73,6 @@ def brands(plugin, uxReferenceV2, feedurlV2):
 @Route.register(content_type=None)
 def tvseason(plugin, seriesId, seasonId):
     plugin.log("<routing> (catalogo:tvseason) [%s, %s]", [seriesId, seasonId], plugin.INFO)
-    yield False
+    no_data = True
+    if no_data:
+        yield False
