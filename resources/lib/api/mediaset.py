@@ -33,9 +33,9 @@ class Auth(AuthBase):
         })
         Script.log("anonymousLogin response: %s", args=[response], lvl=Script.DEBUG)
         if response.status_code == 200:
-            json = response.json()
-            if json and 'isOk' in json and json['isOk']:
-                data = json['response']
+            jsn = response.json()
+            if jsn and 'isOk' in jsn and jsn['isOk']:
+                data = jsn['response']
                 self._beToken = data['beToken']
                 self._sid = data['sid']
 
@@ -52,9 +52,9 @@ class Auth(AuthBase):
             "format": "json",
         })
         if response.status_code == 200:
-            json = response.json()
-            if json and 'errorCode' in json and json['errorCode']==0:
-                self._idToken = json['id_token']
+            jsn = response.json()
+            if jsn and 'errorCode' in jsn and jsn['errorCode']==0:
+                self._idToken = jsn['id_token']
 
     def accountLogin(self):
         url = url_constructor("idm/account/login/v2.0")
@@ -65,9 +65,9 @@ class Auth(AuthBase):
             "include": "personas,adminBeToken",
         })
         if response.status_code == 200:
-            json = response.json()
-            if json and 'isOk' in json and json['isOk']:
-                data = json['response']
+            jsn = response.json()
+            if jsn and 'isOk' in jsn and jsn['isOk']:
+                data = jsn['response']
                 self._sid = data['sid']
                 self._caToken = data['caToken']
                 self._adminBeToken = data['adminBeToken']
@@ -85,9 +85,9 @@ class Auth(AuthBase):
             "id": persona['id'] if persona and 'id' in persona else self.defaultPersona['id'],
         })
         if response.status_code == 200:
-            json = response.json()
-            if json and 'isOk' in json and json['isOk']:
-                data = json['response']
+            jsn = response.json()
+            if jsn and 'isOk' in jsn and jsn['isOk']:
+                data = jsn['response']
                 self._beToken = data['beToken']
                 self._persona = persona
 
@@ -190,11 +190,11 @@ class ApiMediaset():
         url = url_constructor("reco/{account_type}/v2.0".format(account_type=account_type))
         response = self.session.get(url, params=query_params, auth=self.auth)
         if response.status_code == 200:
-            json = response.json()
-            if json and 'isOk' in json and json['isOk']:
-                data = json['response']
+            jsn = response.json()
+            if jsn and 'isOk' in jsn and jsn['isOk']:
+                data = jsn['response']
                 return {
-                    'items': data['blocks'][0]['items'],
+                    'entries': data['blocks'][0]['items'],
                     'pagination': data['pagination'],
                 }
         return False

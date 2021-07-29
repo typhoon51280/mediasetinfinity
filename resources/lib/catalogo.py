@@ -60,7 +60,7 @@ def brands(plugin, uxReferenceV2, feedurlV2):
     if uxReferenceV2:
         data = apiMediaset.reco(uxReference=uxReferenceV2)
         plugin.log("data [%s]", [data], plugin.DEBUG)
-        for item in data['items']:
+        for item in data['entries']:
             plugin.log("item [%s]", [item], plugin.DEBUG)
             listItem = apiMediaset.listItem(item)
             plugin.log("listItem [%s]", [listItem], plugin.DEBUG)

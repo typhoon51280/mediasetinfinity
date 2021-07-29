@@ -3,8 +3,7 @@ import urlquick
 from codequick import Route, Script, utils
 from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
-from resources.lib.six import string_types
-from resources.lib.api.utils import route_callback
+from resources.lib.api.utils import route_callback, string_join
 
 BASE_URL = "https://api.one.accedo.tv"
 APP_KEY = "6023de431de1c4001877be3b"
@@ -56,9 +55,7 @@ class ApiAccedo():
 
     def entriesById(self, ids, locale="it"):
         url = url_constructor("/content/entries")
-        if not isinstance(ids, string_types):
-            ids = ",".join(ids)
-        response = self.session.get(url, params={'locale': locale, 'id': ids}, auth=self.auth)
+        response = self.session.get(url, params={'locale': locale, 'id': string_join(ids)}, auth=self.auth)
         return response.json()
 
     def entriesByAlias(self, alias, locale="it"):

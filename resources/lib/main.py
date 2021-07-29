@@ -8,7 +8,7 @@ import sys
 @Route.register
 def root(plugin):
     yield Listitem.from_dict(navigation, label="Catalogo", params={'id': CATALOGO_MEDIASET})
-    yield Listitem.from_dict(reset, label=utils.bold("Reset"))
+    yield Listitem.from_dict(reset, label=utils.bold("Reset")) # FOR RAPID DEVELOPMENT
 
 @Route.register
 def reset(plugin):
