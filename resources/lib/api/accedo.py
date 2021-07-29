@@ -6,10 +6,6 @@ from requests.auth import AuthBase
 from resources.lib.six import string_types
 from resources.lib.api.utils import route_callback
 
-#: The time in seconds where a cache item is considered stale.
-#: Stale items will stay in the database to allow for conditional headers.
-urlquick.MAX_AGE = 60 * 60 * 4  # 4 Hours
-
 BASE_URL = "https://api.one.accedo.tv"
 APP_KEY = "6023de431de1c4001877be3b"
 GID = "default"

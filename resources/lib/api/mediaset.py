@@ -5,8 +5,6 @@ from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
 from resources.lib.api.utils import route_callback
 
-urlquick.MAX_AGE = 60 * 60 * 4  # 4 Hours
-
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
 url_constructor = utils.urljoin_partial(BASE_URL.format(environment="PROD", product="play"))
 
