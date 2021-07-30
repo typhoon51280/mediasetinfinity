@@ -1,9 +1,9 @@
 import json
 import urlquick
 from codequick import Route, Script, utils
-from codequick.listing import Art, Info, Context, Property, Stream
+# from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
-from resources.lib.api.utils import route_callback, string_join
+from mediaset_infinity.utils import route_callback, string_join
 
 BASE_URL = "https://api.one.accedo.tv"
 APP_KEY = "6023de431de1c4001877be3b"
