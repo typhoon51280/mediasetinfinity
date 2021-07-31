@@ -1,10 +1,8 @@
 from __future__ import absolute_import
-
-from mediasetinfinity.support.six import string_types
-from codequick.support import CallbackRef
 import json
+from mediasetinfinity.support.six import string_types
 
-def string_join(ids, separator=","):
+def join(ids, separator=","):
     if isinstance(ids, string_types):
         return ids
     elif hasattr(ids, '__iter__'):

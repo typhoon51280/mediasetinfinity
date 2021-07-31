@@ -1,8 +1,6 @@
 import urlquick
-from codequick import utils
-from mediasetinfinity.support.routing import route_callback
-from mediasetinfinity.support.strings import string_join
-from mediasetinfinity.support import logger
+from mediasetinfinity.support import logger, strings
+from mediasetinfinity.support.routing import utils, callback
 
 BASE_URL = "https://feed.entertainment.tv.theplatform.eu/f/PR1GhC/"
 url_constructor = utils.urljoin_partial(BASE_URL)
@@ -55,7 +53,7 @@ class ApiComcast():
     def tvSeasonByBrandId(self, brandId):
         return self.__handleResponse(
             self.session.get(url_constructor("mediaset-prod-tv-seasons-v2"), params={
-                'byCustomValue': "{{brandId}}{brandId}".format(brandId=string_join(brandId)),
+                'byCustomValue': "{{brandId}}{brandId}".format(brandId=strings.join(brandId)),
             }), "tvseason")
     ### TV SEASON ###
 
@@ -171,7 +169,7 @@ class ApiComcast():
                 'seriesId': data['seriesId'] if 'seriesId' in data else None,
                 'tvSeasonId': data['tvSeasonId'] if 'tvSeasonId' in data else None,
             },
-            'callback': route_callback("catalogo", "subbrand"),
+            'callback': callback("catalogo", "subbrand"),
             'info': {
                 'plot': tvseason_data['info']['plot'],
                 'plotoutline': tvseason_data['info']['plotoutline'],
@@ -189,7 +187,7 @@ class ApiComcast():
                 'seriesId': data['seriesId'] if 'seriesId' in data else None,
                 'seasonId': data['id'] if 'id' in data else None,
             },
-            'callback': route_callback("catalogo", "tvseason"),
+            'callback': callback("catalogo", "tvseason"),
             'info': {
                 'plot': data['mediasettvseason$longDescription'] if 'mediasettvseason$longDescription' in data else "",
                 'plotoutline': data['description'] if 'description' in data else "",
@@ -209,7 +207,7 @@ class ApiComcast():
             'params': {
                 'guid': data['guid'] if 'guid' in data else None,
             },
-            'callback': route_callback("catalogo", "episode"),
+            'callback': callback("catalogo", "episode"),
             'info': {
                 'plot': data['longDescription'] if 'longDescription' in data else "",
                 'plotoutline': data['description'] if 'description' in data else "",

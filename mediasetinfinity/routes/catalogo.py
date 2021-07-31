@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
-
 from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
 from mediasetinfinity.support import strings, logger
-from codequick import Route, Listitem
+from mediasetinfinity.support.routing import Route, Listitem
 from itertools import chain
 
 CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"

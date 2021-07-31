@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 from mediasetinfinity.routes.catalogo import navigation, CATALOGO_MEDIASET
-from codequick import Route, Listitem, utils
+from mediasetinfinity.support.routing import Route, Listitem, utils
 import sys
 
 @Route.register

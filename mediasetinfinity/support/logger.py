@@ -1,8 +1,7 @@
 from __future__ import absolute_import
-
-from mediasetinfinity.support.routing import Script
 import os
 import sys
+from mediasetinfinity.support.routing import Script
 
 def __callerInfo(args):
     frame = sys._getframe(2).f_code

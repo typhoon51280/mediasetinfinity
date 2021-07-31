@@ -1,10 +1,8 @@
 import urlquick
 from uuid import uuid4
-from codequick import utils
-# from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
-from mediasetinfinity.support.routing import route_callback
 from mediasetinfinity.support import logger
+from mediasetinfinity.support.routing import utils, callback
 
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
 url_constructor = utils.urljoin_partial(BASE_URL.format(environment="PROD", product="play"))
@@ -214,5 +212,5 @@ class ApiMediaset():
                 'seriesGuid': data['id_series_se'] if 'id_series_se' in data else None,
                 'seasonGuid': data['id_series_st'] if 'id_series_st' in data else None,
             },
-            'callback': route_callback("catalogo", "tvseason"),
+            'callback': callback("catalogo", "tvseason"),
         }
