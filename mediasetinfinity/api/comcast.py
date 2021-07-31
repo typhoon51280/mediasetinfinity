@@ -1,6 +1,8 @@
 import urlquick
-from codequick import Route, Script, utils
-from mediaset_infinity.utils import route_callback, string_join, logger
+from codequick import utils
+from mediasetinfinity.support.routing import route_callback
+from mediasetinfinity.support.strings import string_join
+from mediasetinfinity import logger
 
 BASE_URL = "https://feed.entertainment.tv.theplatform.eu/f/PR1GhC/"
 url_constructor = utils.urljoin_partial(BASE_URL)

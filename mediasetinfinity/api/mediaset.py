@@ -1,9 +1,10 @@
 import urlquick
 from uuid import uuid4
-from codequick import Route, Script, utils
-from codequick.listing import Art, Info, Context, Property, Stream
+from codequick import utils
+# from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
-from mediaset_infinity.utils import route_callback
+from mediasetinfinity.support.routing import route_callback
+from mediasetinfinity import logger
 
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
 url_constructor = utils.urljoin_partial(BASE_URL.format(environment="PROD", product="play"))
@@ -13,7 +14,7 @@ API_KEY = "3_l-A-KKZVONJdGd272x41mezO6AUV4mUoxOdZCMfccvEXAJa6COVXyT_tUdQI03dh"
 class Auth(AuthBase):
 
     def __init__(self, email=None, password=None):
-        Script.log("Init Auth Mediaset", lvl=Script.DEBUG)
+        logger.debug("Init Auth Mediaset")
         self._session = urlquick.session()
         self._clientId = str(uuid4())
         self._isAnonymous = not (email and password)
@@ -25,13 +26,13 @@ class Auth(AuthBase):
             self.personaSelect()
 
     def anonymousLogin(self):
-        Script.log("anonymousLogin", lvl=Script.DEBUG)
+        logger.debug("anonymousLogin")
         url = url_constructor("idm/anonymous/login/v2.0")
         response = self.session.post(url, json={
             "appName": "web/mediasetplay-web",
             "client_id": self.clientId,
         })
-        Script.log("anonymousLogin response: %s", args=[response], lvl=Script.DEBUG)
+        logger.debug("anonymousLogin response: %s", response)
         if response.status_code == 200:
             jsn = response.json()
             if jsn and 'isOk' in jsn and jsn['isOk']:
@@ -198,7 +199,7 @@ class ApiMediaset():
     def listItem(self, data, **kwargs):
         if data and 'programtype' in data and data['programtype']:
             programtype = data['programtype'].lower()
-            Script.log("programtype: %s", [programtype], Script.DEBUG)
+            logger.debug("programtype: %s", programtype)
             if programtype == "tvseason":
                 return self.__tvseason(data)
         else:

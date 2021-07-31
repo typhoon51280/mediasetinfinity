@@ -1,4 +1,4 @@
-from mediaset_infinity import start
+from mediasetinfinity import start
 
 if __name__ == "__main__":
     start()

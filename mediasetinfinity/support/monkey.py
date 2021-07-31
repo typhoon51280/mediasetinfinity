@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 from codequick.support import CallbackRef
 
 def PatchCallbackRef(cls):

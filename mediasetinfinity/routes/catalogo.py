@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from mediaset_infinity.api import ApiMediaset, ApiAccedo, ApiComcast
-from mediaset_infinity.utils import tojson, logger
-from codequick import Route, Listitem, Script
+from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
+from mediasetinfinity.support.strings import tojson
+from mediasetinfinity import logger
+from codequick import Route, Listitem
 from itertools import chain
 
 CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
@@ -20,7 +21,6 @@ def listItems(data, mapItem, **kwargs):
 
 @Route.register(content_type=None)
 def navigation(plugin, id=CATALOGO_MEDIASET):
-    logger.info("routing [%s]", id)
     apiAccedo = ApiAccedo()
     navItems = apiAccedo.entry(id)['navItems']
     logger.debug("[navItems] %s", navItems)
@@ -30,7 +30,6 @@ def navigation(plugin, id=CATALOGO_MEDIASET):
 
 @Route.register(content_type=None)
 def navitem(plugin, id):
-    logger.info("routing [%s]", id)
     apiAccedo = ApiAccedo()
     components = apiAccedo.entry(id)['components']
     logger.debug("[components] %s", components)
@@ -40,12 +39,10 @@ def navitem(plugin, id):
 
 @Route.register(content_type=None)
 def banner(plugin, uxReferenceV2, feedurlV2):
-    logger.info("routing [%s, %s]", uxReferenceV2, feedurlV2)
     yield False
 
 @Route.register(content_type=None)
 def brands(plugin, uxReferenceV2, feedurlV2):
-    logger.info("routing [%s, %s]", uxReferenceV2, feedurlV2)
     if uxReferenceV2:
         apiMediaset = ApiMediaset()
         data = apiMediaset.reco(uxReference=uxReferenceV2)
@@ -59,7 +56,6 @@ def brands(plugin, uxReferenceV2, feedurlV2):
 
 @Route.register(content_type=None)
 def tvserie(plugin, seriesGuid, seriesId):
-    logger.info("routing [%s, %s]", seriesId)
     apiComcast = ApiComcast()
     data_series = apiComcast.seriesByGuid(seriesGuid)
     if data_series and 'entries' in data_series and data_series['entries']:
@@ -70,7 +66,6 @@ def tvserie(plugin, seriesGuid, seriesId):
 
 @Route.register(content_type=None)
 def tvseason(plugin, seriesGuid, seasonGuid, seriesId, seasonId):
-    logger.info("routing [%s, %s, %s, %s]", seriesGuid, seasonGuid, seriesId, seasonId)
     apiComcast = ApiComcast()
     subbrands = apiComcast.subbrandByTvSeasonId(seasonId)
     if subbrands and 'entries' in subbrands and subbrands['entries']:
@@ -80,7 +75,6 @@ def tvseason(plugin, seriesGuid, seasonGuid, seriesId, seasonId):
 
 @Route.register(content_type=None)
 def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
-    logger.info("routing [%s, %s, %s]", subBrandId, seriesId, tvSeasonId)
     apiComcast = ApiComcast()
     programs = apiComcast.subBrandHomeMethod(subBrandId)
     logger.debug("[programs] %s", programs)
@@ -92,7 +86,6 @@ def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
 
 @Route.register(content_type=None)
 def episode(plugin, guid):
-    logger.info("routing [%s]", guid)
     # apiComcast = ApiComcast()
     # programs = apiComcast.subBrandHomeMethod(subBrandId)
     # if programs and 'entries' in programs and programs['entries']:

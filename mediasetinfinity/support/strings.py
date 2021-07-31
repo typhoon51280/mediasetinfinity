@@ -1,4 +1,6 @@
-from mediaset_infinity.utils import string_types
+from __future__ import absolute_import
+
+from mediasetinfinity.support.six import string_types
 from codequick.support import CallbackRef
 import json
 
