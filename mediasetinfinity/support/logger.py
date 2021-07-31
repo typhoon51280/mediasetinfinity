@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from codequick import Script
+from mediasetinfinity.support.routing import Script
 import os
 import sys
 

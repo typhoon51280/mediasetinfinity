@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
-from mediasetinfinity.support.strings import tojson
+from mediasetinfinity.support import strings
 from mediasetinfinity import logger
 from codequick import Route, Listitem
 from itertools import chain
@@ -13,9 +13,9 @@ ROUTE = "catalogo"
 def listItems(data, mapItem, **kwargs):
     for item in data:
         if item:
-            logger.debug("[item] %s", tojson(item))
+            logger.debug("[item] %s", strings.tojson(item))
             listItem = mapItem(item, **kwargs)
-            logger.debug("[listItem] %s", tojson(listItem))
+            logger.debug("[listItem] %s", strings.tojson(listItem))
             if listItem:
                 yield Listitem.from_dict(**listItem)
 
