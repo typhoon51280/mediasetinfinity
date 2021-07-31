@@ -1,3 +1,4 @@
+import json
 import urlquick
 from uuid import uuid4
 from requests.auth import AuthBase
@@ -193,6 +194,10 @@ class ApiMediaset():
                     'pagination': data['pagination'],
                 }
         return False
+
+    def play(self, guid):
+        url = url_constructor("playback/check/v2.0")
+        response = self.session.get(url, auth=self.auth, json={})
 
     def listItem(self, data, **kwargs):
         if data and 'programtype' in data and data['programtype']:

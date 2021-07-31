@@ -84,9 +84,6 @@ def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
 
 @Route.register(content_type=None)
 def episode(plugin, guid):
-    # apiComcast = ApiComcast()
-    # programs = apiComcast.subBrandHomeMethod(subBrandId)
-    # if programs and 'entries' in programs and programs['entries']:
-    #     data_programs = programs['entries'] 
-    #     return listItems(data_programs, apiComcast.listItem, apitype=data_programs['apitype'], datatype=data_programs['datatype'])
+    apiMediaset =  ApiMediaset()
+    data = apiMediaset.play(guid)
     return False
