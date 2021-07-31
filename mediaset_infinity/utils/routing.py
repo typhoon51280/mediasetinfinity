@@ -1,6 +1,9 @@
-from codequick import Route, Script
+from codequick import Route
+from itertools import chain
 
 def route_callback(route, callback):
     ref = Route.ref("/mediaset_infinity/routes/{route}:{callback}".format(route=route, callback=callback.replace("-", "_").lower()))
-    Script.log("Route [%s]", [ref.path], Script.DEBUG)
     return ref
+
+def generators(*args):
+    return chain(args)

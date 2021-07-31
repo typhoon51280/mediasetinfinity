@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from mediaset_infinity.api.accedo import ApiAccedo
 from mediaset_infinity.api.mediaset import ApiMediaset
 from mediaset_infinity.api.comcast import ApiComcast

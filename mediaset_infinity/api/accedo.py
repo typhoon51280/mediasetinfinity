@@ -63,7 +63,7 @@ class ApiAccedo():
         response = self.session.get(url, params={'locale': locale, 'typeAlias': alias}, auth=self.auth)
         return response.json()
 
-    def listItem(self, data):
+    def listItem(self, data, **kwargs):
         if data and '_meta' in data:
             typeAlias = data['_meta']['typeAlias']
             if typeAlias == 'navigation-item':
@@ -77,7 +77,7 @@ class ApiAccedo():
         else:
             return False
 
-    def navigation_item(self, data):
+    def navigation_item(self, data, apitype="", datatype=""):
         ctaLink = json.loads(data['ctaLink'])
         return {
             'label': data['title'],

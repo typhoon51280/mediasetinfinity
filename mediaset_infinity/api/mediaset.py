@@ -195,21 +195,23 @@ class ApiMediaset():
                 }
         return False
 
-    def listItem(self, data):
+    def listItem(self, data, **kwargs):
         if data and 'programtype' in data and data['programtype']:
             programtype = data['programtype'].lower()
             Script.log("programtype: %s", [programtype], Script.DEBUG)
             if programtype == "tvseason":
-                return self.tvseason(data)
+                return self.__tvseason(data)
         else:
             return False
 
-    def tvseason(self, data):
+    def __tvseason(self, data):
         return {
             'label': data['title'],
             'params': {
                 'seriesId': data['seriesId'] if 'seriesId' in data else None,
                 'seasonId': data['id'] if 'id' in data else None,
+                'seriesGuid': data['id_series_se'] if 'id_series_se' in data else None,
+                'seasonGuid': data['id_series_st'] if 'id_series_st' in data else None,
             },
             'callback': route_callback("catalogo", "tvseason"),
         }
