@@ -4,7 +4,7 @@ from codequick import utils
 # from codequick.listing import Art, Info, Context, Property, Stream
 from requests.auth import AuthBase
 from mediasetinfinity.support.routing import route_callback
-from mediasetinfinity import logger
+from mediasetinfinity.support import logger
 
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
 url_constructor = utils.urljoin_partial(BASE_URL.format(environment="PROD", product="play"))

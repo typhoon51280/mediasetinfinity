@@ -2,8 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
-from mediasetinfinity.support import strings
-from mediasetinfinity import logger
+from mediasetinfinity.support import strings, logger
 from codequick import Route, Listitem
 from itertools import chain
 
