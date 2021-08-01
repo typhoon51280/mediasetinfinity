@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from codequick import utils, storage, Route, Listitem, Script
+from codequick import utils, storage, Route, Resolver, Listitem, Script
 from codequick.support import CallbackRef, run
 
 def callback(route, callback):

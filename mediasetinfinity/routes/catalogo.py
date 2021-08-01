@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
 from mediasetinfinity.support import strings, logger
-from mediasetinfinity.support.routing import Route, Listitem
+from mediasetinfinity.support.routing import Route, Resolver, Listitem
 from itertools import chain
 
 CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
@@ -82,8 +82,8 @@ def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
         return listItems(data_programs, apiComcast.listItem, datatype="mediasetprogram")
     return False
 
-@Route.register(content_type=None)
+@Resolver.register()
 def episode(plugin, guid):
     apiMediaset =  ApiMediaset()
-    data = apiMediaset.play(guid)
+    data = apiMediaset.check(guid)
     return False

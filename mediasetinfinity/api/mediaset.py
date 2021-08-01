@@ -9,18 +9,20 @@ BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
 url_constructor = utils.urljoin_partial(BASE_URL.format(environment="PROD", product="play"))
 
 API_KEY = "3_l-A-KKZVONJdGd272x41mezO6AUV4mUoxOdZCMfccvEXAJa6COVXyT_tUdQI03dh"
+WIDEVINE_URL = "https://widevine.entitlement.theplatform.eu/wv/web/ModularDrm/getRawWidevineLicense"
+ACCOUNT_ID = "http://access.auth.theplatform.com/data/Account/2702976343"
 
 class Auth(AuthBase):
 
-    def __init__(self, email=None, password=None):
+    def __init__(self, username=None, password=None):
         logger.debug("Init Auth Mediaset")
         self._session = urlquick.session()
         self._clientId = str(uuid4())
-        self._isAnonymous = not (email and password)
+        self._isAnonymous = not (username and password)
         if self.isAnonymous:
             self.anonymousLogin()
         else:
-            self.login(email, password)
+            self.login(username, password)
             self.accountLogin()
             self.personaSelect()
 
@@ -133,6 +135,7 @@ class Auth(AuthBase):
 
     def __call__(self, r):
         r.headers['Authorization'] = "Bearer {beToken}".format(beToken=self.beToken)
+        r.headers['User-Agent'] = "Chrome"
         return r
 
 
@@ -195,9 +198,35 @@ class ApiMediaset():
                 }
         return False
 
-    def play(self, guid):
+    def check(self, guid, live=False):
         url = url_constructor("playback/check/v2.0")
-        response = self.session.get(url, auth=self.auth, json={})
+        response = self.session.get(url, auth=self.auth, json={
+            'contentId': guid,
+            'streamType': "VOD",
+            'delivery': "Streaming",
+            'createDevice': True,
+        })
+        if response.status_code == 200:
+            jsn = response.json()
+            if jsn and 'isOk' in jsn and jsn['isOk']:
+                data = jsn['response']
+                return {
+                    'media': data['mediaselector'],
+                    'channelsRights': jsn['channelsRights'],
+                    "channelsRightsUser": jsn['channelsRightsUser'],
+                }
+        return False
+    
+    def getLicenseKey(self, releasePid, headers=None):
+        headerStr = utils.urlparse.urlencode(headers) if headers else ""
+        return (
+            "{url}"
+            "?releasePid={releasePid}"
+            "&token={token}"
+            "&account={account}"
+            "&schema=1.0"
+            "|{headers}|R{{SSM}}|"
+        ).format(url=WIDEVINE_URL, releasePid=releasePid, token=self.auth.beToken, account=ACCOUNT_ID, headers=headerStr)
 
     def listItem(self, data, **kwargs):
         if data and 'programtype' in data and data['programtype']:
