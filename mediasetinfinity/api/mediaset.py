@@ -1,8 +1,9 @@
+from __future__ import unicode_literals, absolute_import
 import json
 import urlquick
 from uuid import uuid4
 from requests.auth import AuthBase
-from mediasetinfinity.support import logger
+from mediasetinfinity.support import logger, KODI_VERSION_MAJOR
 from mediasetinfinity.support.routing import utils, callback
 
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
@@ -198,22 +199,51 @@ class ApiMediaset():
                 }
         return False
 
-    def check(self, guid, live=False):
+    def check(self, guid, streamType=None, delivery=None):
         url = url_constructor("playback/check/v2.0")
-        response = self.session.get(url, auth=self.auth, json={
+        response = self.session.post(url, auth=self.auth, json={
             'contentId': guid,
-            'streamType': "VOD",
-            'delivery': "Streaming",
+            'streamType': streamType or "VOD",
+            'delivery': delivery or "Streaming",
             'createDevice': True,
         })
         if response.status_code == 200:
             jsn = response.json()
             if jsn and 'isOk' in jsn and jsn['isOk']:
                 data = jsn['response']
+                logger.debug("[data] %s", data)
                 return {
-                    'media': data['mediaselector'],
-                    'channelsRights': jsn['channelsRights'],
-                    "channelsRightsUser": jsn['channelsRightsUser'],
+                    'media': data['mediaSelector'] if 'mediaSelector' in data else "",
+                    'channelsRights': data['channelsRights'] if 'channelsRights' in data else "",
+                    "channelsRightsUser": data['channelsRightsUser'] if 'channelsRightsUser' in data else "",
+                }
+        return False
+    
+    def getVideo(self, media, delivery=None):
+        response = self.session.get(media['url'], params={
+            'auth': self.auth.beToken,
+            'format': media['format'],
+            'formats': media['formats'],
+            'assetTypes': media['assetTypes'],
+            'balance': media['balance'],
+            'auto': media['auto'],
+            'tracking': media['tracking'],
+            'delivery': delivery or "Streaming",
+        })
+        body = response.parse("body")
+        for el in body.iterfind(".//switch"):
+            vid = el.find("./video")
+            ref = el.find("./ref")
+            if vid is not None and ref is not None:
+                security = ref.get("security", "")
+                trackingData = ref.find("./param[@name='trackingData']")
+                trackingDataParams = utils.parse_qs(trackingData.get("value", "").replace("|","&")) if trackingData is not None else None
+                pid = trackingDataParams['pid'] if trackingDataParams and 'pid' in trackingDataParams else ""
+                return {
+                    'url': vid.get("src", ""),
+                    'type': ref.get("type", ""),
+                    'security': security == "commonEncryption",
+                    'pid': pid,
                 }
         return False
     
@@ -229,13 +259,39 @@ class ApiMediaset():
         ).format(url=WIDEVINE_URL, releasePid=releasePid, token=self.auth.beToken, account=ACCOUNT_ID, headers=headerStr)
 
     def listItem(self, data, **kwargs):
-        if data and 'programtype' in data and data['programtype']:
-            programtype = data['programtype'].lower()
-            logger.debug("programtype: %s", programtype)
+        programtype = data['programtype'].lower() if 'programtype' in data and data['programtype'] else None
+        if not programtype:
+            programtype = data['programType'].lower() if 'programType' in data and data['programType'] else None
+        if not programtype:
+            programtype = kwargs['programtype'] if 'programtype' in kwargs else None
+        logger.debug("programtype: %s", programtype)
+        if programtype:
             if programtype == "tvseason":
                 return self.__tvseason(data)
+            elif programtype == "vod":
+                return self.__vod(data)
         else:
             return False
+
+    def __vod(self, data):
+        from inputstreamhelper import Helper
+        is_helper = Helper("mpd", drm="com.widevine.alpha")
+        if is_helper.check_inputstream():
+            properties = {
+                'inputstream.adaptive.manifest_type': "",
+                'inputstream.adaptive.license_type': "",
+                'inputstream.adaptive.license_key': "",
+            }
+            if KODI_VERSION_MAJOR >= 19:
+                properties['inputstream'] = is_helper.inputstream_addon
+            else:
+                properties['inputstreamaddon'] = is_helper.inputstream_addon
+            return {
+                'callback': str(data['url']),
+                'label': str(data['url']),
+                'properties': properties,
+            }
+        return False
 
     def __tvseason(self, data):
         return {

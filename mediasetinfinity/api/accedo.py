@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, absolute_import
 import json
 import urlquick
 from requests.auth import AuthBase

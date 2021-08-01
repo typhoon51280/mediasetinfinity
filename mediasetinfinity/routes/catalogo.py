@@ -9,13 +9,18 @@ CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
 ROUTE = "catalogo"
 
 def listItems(data, mapItem, **kwargs):
-    for item in data:
-        if item:
-            logger.debug("[item] %s", strings.tojson(item))
-            listItem = mapItem(item, **kwargs)
-            logger.debug("[listItem] %s", strings.tojson(listItem))
-            if listItem:
-                yield Listitem.from_dict(**listItem)
+    no_data = True
+    if data:
+        for item in data:
+            if item:
+                logger.debug("[item] %s", strings.tojson(item))
+                listItem = mapItem(item, **kwargs)
+                logger.debug("[listItem] %s", strings.tojson(listItem))
+                if listItem:
+                    no_data = False
+                    yield Listitem.from_dict(**listItem)
+    if no_data:
+        yield False
 
 @Route.register(content_type=None)
 def navigation(plugin, id=CATALOGO_MEDIASET):
@@ -24,7 +29,7 @@ def navigation(plugin, id=CATALOGO_MEDIASET):
     logger.debug("[navItems] %s", navItems)
     data = apiAccedo.entriesById(navItems)
     # logger.debug("[data] %s", data)
-    return listItems(data['entries'], apiAccedo.listItem) or False
+    return listItems(data['entries'], apiAccedo.listItem)
 
 @Route.register(content_type=None)
 def navitem(plugin, id):
@@ -33,7 +38,7 @@ def navitem(plugin, id):
     logger.debug("[components] %s", components)
     data = apiAccedo.entriesById(components)
     # logger.debug("[data] %s", data)
-    return listItems(data['entries'], apiAccedo.listItem) or False
+    return listItems(data['entries'], apiAccedo.listItem)
 
 @Route.register(content_type=None)
 def banner(plugin, uxReferenceV2, feedurlV2):
@@ -45,11 +50,11 @@ def brands(plugin, uxReferenceV2, feedurlV2):
         apiMediaset = ApiMediaset()
         data = apiMediaset.reco(uxReference=uxReferenceV2)
         logger.debug("[data] %s", data)
-        return listItems(data['entries'], apiMediaset.listItem) or False
+        return listItems(data['entries'], apiMediaset.listItem)
     elif feedurlV2:
         apiComcast = ApiComcast()
         data = apiComcast.feeds(feedurlV2)
-        return listItems(data['entries'], apiComcast.listItem) or False
+        return listItems(data['entries'], apiComcast.listItem)
     return False
 
 @Route.register(content_type=None)
@@ -83,7 +88,25 @@ def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
     return False
 
 @Resolver.register()
-def episode(plugin, guid):
+def play(plugin, guid):
     apiMediaset =  ApiMediaset()
-    data = apiMediaset.check(guid)
+    program = apiMediaset.check(guid)
+    logger.debug("[program] %s", program)
+    logger.debug("[media] %s", program['media'])
+    if program and 'media' in program:
+        video = apiMediaset.getVideo(program['media'])
+        logger.debug("[video] %s", video)
+        if video:
+            mapItem = apiMediaset.listItem(video, programtype="vod")
+            logger.debug("[mapItem] %s", mapItem)
+            if mapItem:
+                item = Listitem.from_dict(**mapItem)
+                item.listitem.setMimeType(video['type'])
+                item.listitem.setContentLookup(False)
+                listitem = item.build()[1]
+                logger.debug("[path] %s", listitem.getPath())
+                logger.debug("[folder] %s", listitem.getProperty("folder"))
+                logger.debug("[isplayable] %s", listitem.getProperty("isplayable"))
+                logger.debug("[mediatype] %s", listitem.getVideoInfoTag().getMediaType())
+                return listitem
     return False

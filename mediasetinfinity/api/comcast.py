@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, absolute_import
 import urlquick
 from mediasetinfinity.support import logger, strings
 from mediasetinfinity.support.routing import utils, callback
@@ -207,7 +208,7 @@ class ApiComcast():
             'params': {
                 'guid': data['guid'] if 'guid' in data else None,
             },
-            'callback': callback("catalogo", "episode"),
+            'callback': callback("catalogo", "play"),
             'info': {
                 'plot': data['longDescription'] if 'longDescription' in data else "",
                 'plotoutline': data['description'] if 'description' in data else "",
