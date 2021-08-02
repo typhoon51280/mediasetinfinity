@@ -4,6 +4,7 @@ import urlquick
 from uuid import uuid4
 from requests.auth import AuthBase
 from mediasetinfinity.support import logger, KODI_VERSION_MAJOR
+from mediasetinfinity.support.six import urlencode
 from mediasetinfinity.support.routing import utils, callback
 
 BASE_URL = "https://api-ott-prod-fe.mediaset.net/{environment}/{product}/"
@@ -209,6 +210,7 @@ class ApiMediaset():
         })
         if response.status_code == 200:
             jsn = response.json()
+            logger.debug("[response] %s", jsn)
             if jsn and 'isOk' in jsn and jsn['isOk']:
                 data = jsn['response']
                 logger.debug("[data] %s", data)
@@ -230,8 +232,10 @@ class ApiMediaset():
             'tracking': media['tracking'],
             'delivery': delivery or "Streaming",
         })
-        body = response.parse("body")
-        for el in body.iterfind(".//switch"):
+        root = response.parse("smil")
+        title = root.find(".//meta[@name='title']")
+        logger.debug("[title] %s", title.text if title is not None else "")
+        for el in root.iterfind(".//switch"):
             vid = el.find("./video")
             ref = el.find("./ref")
             if vid is not None and ref is not None:
@@ -239,22 +243,25 @@ class ApiMediaset():
                 trackingData = ref.find("./param[@name='trackingData']")
                 trackingDataParams = utils.parse_qs(trackingData.get("value", "").replace("|","&")) if trackingData is not None else None
                 pid = trackingDataParams['pid'] if trackingDataParams and 'pid' in trackingDataParams else ""
+                url = vid.get("src", "")
+                mimetype = ref.get("type", "")
                 return {
-                    'url': vid.get("src", ""),
-                    'type': ref.get("type", ""),
+                    'url': url,
+                    'mimetype': mimetype,
                     'security': security == "commonEncryption",
                     'pid': pid,
+                    'title': title.get("content", "") if title is not None else "",
                 }
         return False
     
     def getLicenseKey(self, releasePid, headers=None):
-        headerStr = utils.urlparse.urlencode(headers) if headers else ""
+        headerStr = urlencode(headers) if headers else ""
         return (
             "{url}"
             "?releasePid={releasePid}"
-            "&token={token}"
             "&account={account}"
             "&schema=1.0"
+            "&token={token}"
             "|{headers}|R{{SSM}}|"
         ).format(url=WIDEVINE_URL, releasePid=releasePid, token=self.auth.beToken, account=ACCOUNT_ID, headers=headerStr)
 
@@ -274,23 +281,25 @@ class ApiMediaset():
             return False
 
     def __vod(self, data):
-        from inputstreamhelper import Helper
-        is_helper = Helper("mpd", drm="com.widevine.alpha")
-        if is_helper.check_inputstream():
-            properties = {
-                'inputstream.adaptive.manifest_type': "",
-                'inputstream.adaptive.license_type': "",
-                'inputstream.adaptive.license_key': "",
-            }
-            if KODI_VERSION_MAJOR >= 19:
-                properties['inputstream'] = is_helper.inputstream_addon
-            else:
-                properties['inputstreamaddon'] = is_helper.inputstream_addon
-            return {
-                'callback': str(data['url']),
-                'label': str(data['url']),
-                'properties': properties,
-            }
+        from inputstreamhelper import Helper              
+        if 'url' in data and data['url'] and 'pid' in data and data['pid']:
+            url = data['url']
+            pid = data['pid']
+            protocol = url.split("/")[-1].split(".")[-1]
+            drm = "com.widevine.alpha"
+            is_helper = Helper(protocol, drm=drm)
+            if is_helper.check_inputstream():
+                properties = {
+                    "{}".format("inputstream" if KODI_VERSION_MAJOR >= 19 else "inputstreamaddon"): is_helper.inputstream_addon,
+                    "{}.{}".format(is_helper.inputstream_addon, "manifest_type"): protocol,
+                    "{}.{}".format(is_helper.inputstream_addon, "license_type"): drm,
+                    "{}.{}".format(is_helper.inputstream_addon, "license_key"): self.getLicenseKey(pid, {'User-Agent': "Chrome", 'Accept': "*/*", 'Content-Type': ""}),
+                }
+                return {
+                    'callback': utils.ensure_native_str(url),
+                    'label': data['title'] if 'title' in data else "",
+                    'properties': properties,
+                }
         return False
 
     def __tvseason(self, data):

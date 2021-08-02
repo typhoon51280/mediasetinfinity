@@ -2,8 +2,9 @@
 from __future__ import unicode_literals, absolute_import
 from mediasetinfinity.api import ApiMediaset, ApiAccedo, ApiComcast
 from mediasetinfinity.support import strings, logger
-from mediasetinfinity.support.routing import Route, Resolver, Listitem
+from mediasetinfinity.support.routing import Route, Resolver, Listitem, utils
 from itertools import chain
+import xbmcgui
 
 CATALOGO_MEDIASET = "600af5c21de1c4001bfadf4f"
 ROUTE = "catalogo"
@@ -76,7 +77,7 @@ def tvseason(plugin, seriesGuid, seasonGuid, seriesId, seasonId):
         return listItems(data_subbrands, apiComcast.listItem, apitype=subbrands['apitype'], datatype=subbrands['datatype'], programtype="subbrand")
     return False
 
-@Route.register(content_type=None)
+@Route.register(content_type="video")
 def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
     apiComcast = ApiComcast()
     programs = apiComcast.subBrandHomeMethod(subBrandId)
@@ -92,8 +93,8 @@ def play(plugin, guid):
     apiMediaset =  ApiMediaset()
     program = apiMediaset.check(guid)
     logger.debug("[program] %s", program)
-    logger.debug("[media] %s", program['media'])
     if program and 'media' in program:
+        logger.debug("[media] %s", program['media'])
         video = apiMediaset.getVideo(program['media'])
         logger.debug("[video] %s", video)
         if video:
@@ -101,12 +102,7 @@ def play(plugin, guid):
             logger.debug("[mapItem] %s", mapItem)
             if mapItem:
                 item = Listitem.from_dict(**mapItem)
-                item.listitem.setMimeType(video['type'])
+                item.listitem.setMimeType(video['mimetype'])
                 item.listitem.setContentLookup(False)
-                listitem = item.build()[1]
-                logger.debug("[path] %s", listitem.getPath())
-                logger.debug("[folder] %s", listitem.getProperty("folder"))
-                logger.debug("[isplayable] %s", listitem.getProperty("isplayable"))
-                logger.debug("[mediatype] %s", listitem.getVideoInfoTag().getMediaType())
-                return listitem
+                return item
     return False

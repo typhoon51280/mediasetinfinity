@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 import urlquick
 from mediasetinfinity.support import logger, strings
-from mediasetinfinity.support.routing import utils, callback
+from mediasetinfinity.support.routing import utils, callback, resolver
 
 BASE_URL = "https://feed.entertainment.tv.theplatform.eu/f/PR1GhC/"
 url_constructor = utils.urljoin_partial(BASE_URL)
@@ -208,7 +208,7 @@ class ApiComcast():
             'params': {
                 'guid': data['guid'] if 'guid' in data else None,
             },
-            'callback': callback("catalogo", "play"),
+            'callback': resolver("catalogo", "play"),
             'info': {
                 'plot': data['longDescription'] if 'longDescription' in data else "",
                 'plotoutline': data['description'] if 'description' in data else "",
@@ -217,6 +217,7 @@ class ApiComcast():
                 'poster': images['image_vertical-264x396']['url'],
                 'banner': images['image_header_poster-1440x630']['url'],
                 'fanart': images['image_horizontal_cover-704x396']['url'],
-                'thumb': images['brand_logo-210x210']['url'],
+                'thumb': "",
+                'icon': images['brand_logo-210x210']['url'],
             },
         }

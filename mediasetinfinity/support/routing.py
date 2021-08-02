@@ -6,3 +6,7 @@ from codequick.script import addon_logger
 def callback(route, callback):
     ref = Route.ref("/mediasetinfinity/routes/{route}:{callback}".format(route=route, callback=callback.replace("-", "_").lower()))
     return ref
+
+def resolver(route, callback):
+    ref = Resolver.ref("/mediasetinfinity/routes/{route}:{callback}".format(route=route, callback=callback.replace("-", "_").lower()))
+    return ref

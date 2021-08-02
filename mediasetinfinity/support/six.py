@@ -14,9 +14,11 @@ if PY3:
     text_type = str
     binary_type = bytes
     MAXSIZE = sys.maxsize
+    from urllib.parse import urlencode
 else:
     string_types = basestring,
     integer_types = (int, long)
     class_types = (type, types.ClassType)
     text_type = unicode
     binary_type = str
+    from urllib import urlencode
