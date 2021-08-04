@@ -235,9 +235,10 @@ class ApiMediaset():
         root = response.parse("smil")
         title = root.find(".//meta[@name='title']")
         logger.debug("[title] %s", title.text if title is not None else "")
-        for el in root.iterfind(".//switch"):
-            vid = el.find("./video")
-            ref = el.find("./ref")
+        for par in root.iterfind(".//par"):
+            switch = par.find("./switch")
+            vid = switch.find("./video")
+            ref = switch.find("./ref")
             if vid is not None and ref is not None:
                 security = ref.get("security", "")
                 trackingData = ref.find("./param[@name='trackingData']")
@@ -245,12 +246,16 @@ class ApiMediaset():
                 pid = trackingDataParams['pid'] if trackingDataParams and 'pid' in trackingDataParams else ""
                 url = vid.get("src", "")
                 mimetype = ref.get("type", "")
+                subs = list()
+                for sub in par.iterfind("./textstream[@type='text/srt']"):
+                    subs.append({'lang': sub.get("lang", ""), 'url': sub.get("src", "")})
                 return {
                     'url': url,
                     'mimetype': mimetype,
                     'security': security == "commonEncryption",
                     'pid': pid,
                     'title': title.get("content", "") if title is not None else "",
+                    'subs': subs,
                 }
         return False
     
@@ -295,10 +300,16 @@ class ApiMediaset():
                     "{}.{}".format(is_helper.inputstream_addon, "license_type"): drm,
                     "{}.{}".format(is_helper.inputstream_addon, "license_key"): self.getLicenseKey(pid, {'User-Agent': "Chrome", 'Accept': "*/*", 'Content-Type': ""}),
                 }
+                subtitles = list()
+                for idx, sub in enumerate(data['subs']):
+                    properties['SubtitleLanguage.{}'.format(idx)] = sub['lang'].lower()
+                    subtitles.append(sub['url'])
+                # subtitles = list(map(lambda x: x['url'], data['subs']))
                 return {
                     'callback': utils.ensure_native_str(url),
                     'label': data['title'] if 'title' in data else "",
                     'properties': properties,
+                    'subtitles': subtitles,
                 }
         return False
 

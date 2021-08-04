@@ -77,7 +77,7 @@ def tvseason(plugin, seriesGuid, seasonGuid, seriesId, seasonId):
         return listItems(data_subbrands, apiComcast.listItem, apitype=subbrands['apitype'], datatype=subbrands['datatype'], programtype="subbrand")
     return False
 
-@Route.register(content_type="video")
+@Route.register(content_type="episode")
 def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
     apiComcast = ApiComcast()
     programs = apiComcast.subBrandHomeMethod(subBrandId)
@@ -89,20 +89,23 @@ def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
     return False
 
 @Resolver.register()
-def play(plugin, guid):
-    apiMediaset =  ApiMediaset()
-    program = apiMediaset.check(guid)
-    logger.debug("[program] %s", program)
-    if program and 'media' in program:
-        logger.debug("[media] %s", program['media'])
-        video = apiMediaset.getVideo(program['media'])
-        logger.debug("[video] %s", video)
-        if video:
-            mapItem = apiMediaset.listItem(video, programtype="vod")
-            logger.debug("[mapItem] %s", mapItem)
-            if mapItem:
-                item = Listitem.from_dict(**mapItem)
-                item.listitem.setMimeType(video['mimetype'])
-                item.listitem.setContentLookup(False)
-                return item
+def play(plugin, guid=None):
+    if guid:
+        apiMediaset =  ApiMediaset()
+        program = apiMediaset.check(guid)
+        logger.debug("[program] %s", program)
+        if program and 'media' in program:
+            logger.debug("[media] %s", program['media'])
+            video = apiMediaset.getVideo(program['media'])
+            logger.debug("[video] %s", video)
+            if video:
+                mapItem = apiMediaset.listItem(video, programtype="vod")
+                logger.debug("[mapItem] %s", mapItem)
+                if mapItem:
+                    item = Listitem.from_dict(**mapItem)
+                    item.listitem.setMimeType(video['mimetype'])
+                    item.listitem.setContentLookup(True)
+                    item.listitem.addStreamInfo('subtitle', {'language': 'en'})
+                    item.listitem.addStreamInfo('subtitle', {'language': 'it'})
+                    return item
     return False
