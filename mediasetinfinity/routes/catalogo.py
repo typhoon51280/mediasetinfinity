@@ -104,8 +104,11 @@ def play(plugin, guid=None):
                 if mapItem:
                     item = Listitem.from_dict(**mapItem)
                     item.listitem.setMimeType(video['mimetype'])
-                    item.listitem.setContentLookup(True)
-                    item.listitem.addStreamInfo('subtitle', {'language': 'en'})
-                    item.listitem.addStreamInfo('subtitle', {'language': 'it'})
+                    item.listitem.setContentLookup(False)
+                    item.listitem.setProperty('SubtitleLanguage', 'eng')
+                    item.listitem.setProperty('SubtitleLanguage.1', 'eng')
+                    item.listitem.setProperty('SubtitleLanguage.2', 'ita')
+                    # item.listitem.addStreamInfo('subtitle', {'language': 'ENG'})
+                    # item.listitem.addStreamInfo('subtitle', {'language': 'ITA'})
                     return item
     return False

@@ -140,10 +140,10 @@ class ApiComcast():
             logger.debug("[datatype] %s", datatype)
             if datatype == "mediasetprogram":
                 programtype = data['programtype'].lower() if 'programtype' in data and data['programtype'] else None
-                if not programtype:
-                    programtype = data['programType'].lower() if 'programType' in data and data['programType'] else None
-                if not programtype:
-                    programtype = kwargs['programtype'] if 'programtype' in kwargs else None
+                if not programtype and 'programType' in data and data['programType']:
+                    programtype = data['programType'].lower()
+                if not programtype and 'programtype' in kwargs and kwargs['programtype']:
+                    programtype = kwargs['programtype']
                 logger.debug("[programtype] %s", programtype)
                 if programtype == "episode":
                     return self.__episode(data)
@@ -151,6 +151,8 @@ class ApiComcast():
                     return self.__serie(data)
                 elif programtype == "subbrand":
                     return self.__subbrand(data)
+                elif programtype == "extra":
+                    return self.__extra(data)
             elif datatype == "mediasettvseason":
                 return self.__tvseason(data)
         return False
@@ -198,6 +200,27 @@ class ApiComcast():
                 'banner': images['image_header_poster-1440x630']['url'], # images['image_header_poster-1440x433']['url'],
                 'fanart': images['image_horizontal_cover-704x396']['url'], # if 'brand_cover-768x340' in images else images['image_horizontal_cover-704x396']['url'],
                 'thumb': images['brand_logo-210x210']['url'],
+            },
+        }
+
+    def __extra(self, data):
+        images = data['thumbnails']
+        return {
+            'label': data['title'],
+            'params': {
+                'guid': data['guid'] if 'guid' in data else None,
+            },
+            'callback': resolver("catalogo", "play"),
+            'info': {
+                'plot': data['longDescription'] if 'longDescription' in data else "",
+                'plotoutline': data['description'] if 'description' in data else "",
+            },
+            'art': {
+                'poster': images['image_vertical-264x396']['url'],
+                'banner': images['image_header_poster-1440x630']['url'],
+                'fanart': images['image_horizontal_cover-704x396']['url'],
+                'thumb': "",
+                'icon': images['brand_logo-210x210']['url'],
             },
         }
 

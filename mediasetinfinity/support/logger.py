@@ -20,3 +20,6 @@ def info(msg="", *args):
 
 def error(msg="", *args):
     Script.log("(%s.%s) " + msg, __callerInfo(args), Script.ERROR)
+
+def notify(heading, message, icon=None, display_time=5000, sound=True):
+    Script.notify(heading, message, icon, display_time, sound)

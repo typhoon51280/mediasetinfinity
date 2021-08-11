@@ -219,6 +219,12 @@ class ApiMediaset():
                     'channelsRights': data['channelsRights'] if 'channelsRights' in data else "",
                     "channelsRightsUser": data['channelsRightsUser'] if 'channelsRightsUser' in data else "",
                 }
+            elif 'error' in jsn and jsn['error']:
+                error = jsn['error']
+                optionName = "Infinity"
+                heading = error['title'].replace("#optionName#", optionName)
+                message = error['description'].replace("#optionName#", optionName)
+                logger.notify(heading, message, display_time=2000)
         return False
     
     def getVideo(self, media, delivery=None):
@@ -231,6 +237,7 @@ class ApiMediaset():
             'auto': media['auto'],
             'tracking': media['tracking'],
             'delivery': delivery or "Streaming",
+            'publicUrl': media['publicUrl'] if 'publicUrl' in media else None,
         })
         root = response.parse("smil")
         title = root.find(".//meta[@name='title']")
@@ -302,7 +309,7 @@ class ApiMediaset():
                 }
                 subtitles = list()
                 for idx, sub in enumerate(data['subs']):
-                    properties['SubtitleLanguage.{}'.format(idx)] = sub['lang'].lower()
+                    # properties['SubtitleLanguage.{}'.format(idx)] = sub['lang'].lower()
                     subtitles.append(sub['url'])
                 # subtitles = list(map(lambda x: x['url'], data['subs']))
                 return {

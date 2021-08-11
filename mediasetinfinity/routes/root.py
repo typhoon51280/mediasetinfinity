@@ -5,12 +5,12 @@ from mediasetinfinity.support.routing import Route, Listitem, Script, dispatcher
 import sys
 import xbmc
 
-@Route.register
+@Route.register(content_type=None)
 def root(plugin):
     yield Listitem.from_dict(navigation, label="Catalogo", params={'id': CATALOGO_MEDIASET})
     yield Listitem.from_dict(reset, label="Reset") # FOR RAPID DEVELOPMENT
 
-@Route.register
+@Route.register(content_type=None)
 def reset(plugin):
     dispatcher.reset()
     dispatcher.registered_routes = {}
