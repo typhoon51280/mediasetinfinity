@@ -78,6 +78,17 @@ def tvseason(plugin, seriesGuid, seasonGuid, seriesId, seasonId):
     return False
 
 @Route.register(content_type="episode")
+def episode(plugin, subBrandId, seriesId, tvSeasonId):
+    apiComcast = ApiComcast()
+    programs = apiComcast.subBrandHomeMethod(subBrandId)
+    logger.debug("[programs] %s", programs)
+    if programs and 'entries' in programs and programs['entries']:
+        data_programs = programs['entries']
+        logger.debug("[data_programs] %s", data_programs)
+        return listItems(data_programs, apiComcast.listItem, datatype="mediasetprogram")
+    return False
+
+@Route.register(content_type="video")
 def subbrand(plugin, subBrandId, seriesId, tvSeasonId):
     apiComcast = ApiComcast()
     programs = apiComcast.subBrandHomeMethod(subBrandId)
@@ -105,9 +116,9 @@ def play(plugin, guid=None):
                     item = Listitem.from_dict(**mapItem)
                     item.listitem.setMimeType(video['mimetype'])
                     item.listitem.setContentLookup(False)
-                    item.listitem.setProperty('SubtitleLanguage', 'eng')
-                    item.listitem.setProperty('SubtitleLanguage.1', 'eng')
-                    item.listitem.setProperty('SubtitleLanguage.2', 'ita')
+                    # item.listitem.setProperty('SubtitleLanguage', 'eng')
+                    # item.listitem.setProperty('SubtitleLanguage.1', 'eng')
+                    # item.listitem.setProperty('SubtitleLanguage.2', 'ita')
                     # item.listitem.addStreamInfo('subtitle', {'language': 'ENG'})
                     # item.listitem.addStreamInfo('subtitle', {'language': 'ITA'})
                     return item

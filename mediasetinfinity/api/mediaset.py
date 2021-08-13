@@ -1,5 +1,4 @@
 from __future__ import unicode_literals, absolute_import
-import json
 import urlquick
 from uuid import uuid4
 from requests.auth import AuthBase
@@ -308,10 +307,8 @@ class ApiMediaset():
                     "{}.{}".format(is_helper.inputstream_addon, "license_key"): self.getLicenseKey(pid, {'User-Agent': "Chrome", 'Accept': "*/*", 'Content-Type': ""}),
                 }
                 subtitles = list()
-                for idx, sub in enumerate(data['subs']):
-                    # properties['SubtitleLanguage.{}'.format(idx)] = sub['lang'].lower()
+                for sub in data['subs']:
                     subtitles.append(sub['url'])
-                # subtitles = list(map(lambda x: x['url'], data['subs']))
                 return {
                     'callback': utils.ensure_native_str(url),
                     'label': data['title'] if 'title' in data else "",

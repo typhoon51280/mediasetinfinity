@@ -2,6 +2,7 @@ from __future__ import unicode_literals, absolute_import
 import urlquick
 from mediasetinfinity.support import logger, strings
 from mediasetinfinity.support.routing import utils, callback, resolver
+from mediasetinfinity.api.labels import logo_mediaset, logo_mediaset_play, logo_infinity, logo_infinity_plus
 
 BASE_URL = "https://feed.entertainment.tv.theplatform.eu/f/PR1GhC/"
 url_constructor = utils.urljoin_partial(BASE_URL)
@@ -165,6 +166,7 @@ class ApiComcast():
     def __subbrand(self, data):
         tvseason = self.tvSeasonById(data['tvSeasonId'])['entries'][0]
         tvseason_data = self.__tvseason(tvseason)
+        subbrand_type = "episode" if 'mediasetprogram$editorialType' in data and data['mediasetprogram$editorialType'] == "Full Episode" else "subbrand"
         return {
             'label': data['description'],
             'params': {
@@ -172,7 +174,7 @@ class ApiComcast():
                 'seriesId': data['seriesId'] if 'seriesId' in data else None,
                 'tvSeasonId': data['tvSeasonId'] if 'tvSeasonId' in data else None,
             },
-            'callback': callback("catalogo", "subbrand"),
+            'callback': callback("catalogo", subbrand_type),
             'info': {
                 'plot': tvseason_data['info']['plot'],
                 'plotoutline': tvseason_data['info']['plotoutline'],
@@ -226,8 +228,9 @@ class ApiComcast():
 
     def __episode(self, data):
         images = data['thumbnails']
+        label = self.__label(data['title'], data['mediasetprogram$channelsRights'])
         return {
-            'label': data['title'],
+            'label': label,
             'params': {
                 'guid': data['guid'] if 'guid' in data else None,
             },
@@ -235,6 +238,7 @@ class ApiComcast():
             'info': {
                 'plot': data['longDescription'] if 'longDescription' in data else "",
                 'plotoutline': data['description'] if 'description' in data else "",
+                'title': label, ## required for text formatting by some skins (like estuary) ##
             },
             'art': {
                 'poster': images['image_vertical-264x396']['url'],
@@ -244,3 +248,38 @@ class ApiComcast():
                 'icon': images['brand_logo-210x210']['url'],
             },
         }
+
+    def __label(self, title, channelRights):
+        channels =  {
+            'Anonymous': None,
+            'MediasetPlay': None,
+            'Infinity': None,
+            'Starz': None,
+            'ciplayit': None,
+            'historyplayit': None,
+            'blazeplayit': None,
+            'Moonbug': None,
+            'MidnightFactory': None,
+            'Juventus': None,
+        }
+        for chn in channelRights:
+            tokens = chn.split("_")
+            if len(tokens) == 1:
+                value = tokens[0]
+                if value == "AVOD":
+                    channels['Anonymous'] = True
+            elif len(tokens) > 1:
+                key = tokens[0]
+                value = tokens[1]
+                oldval = channels[key]
+                if (oldval is None) or (value == "ANY") or (oldval != "ANY" and oldval != "AVOD"):
+                    channels[key] = value
+        logger.debug("[channels] (%s) - (%s)", channelRights, channels)
+        if channels['Anonymous']:
+            title = "[{}] {}".format(logo_mediaset, title)
+        elif channels['MediasetPlay'] in ["SVOD", "ANY"]:   
+            title = "[{}] {}".format(logo_mediaset_play, title)
+        elif channels['Infinity'] in ["SVOD", "ANY"]:
+            title = "[{}] {}".format(logo_infinity_plus, title)
+        logger.debug("[title] %s", title)
+        return title 
